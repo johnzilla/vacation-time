@@ -71,3 +71,19 @@ The app protects your existing web experience while enhancing mobile:
 - **Desktop First**: Full-featured desktop experience preserved
 - **Mobile Enhanced**: Additional mobile-specific features
 - **Progressive**: Features gracefully degrade on smaller screens
+
+## 📄 License
+
+Licensed under the Apache License, Version 2.0. See [LICENSE](./LICENSE) for details.
+
+## 👨‍💻 Author
+
+**John Turner**
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📞 Support
+
+If you have any questions or need help, please open an issue on GitHub.

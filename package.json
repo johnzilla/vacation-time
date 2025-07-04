@@ -1,7 +1,24 @@
 {
-  "name": "vite-react-typescript-starter",
+  "name": "vacation-time-optimizer",
+  "version": "1.0.0",
+  "description": "A smart vacation planning app that helps you maximize your time off by finding optimal vacation periods around holidays",
+  "author": "John Turner",
+  "license": "Apache-2.0",
   "private": true,
-  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/johnturner/vacation-time-optimizer.git"
+  },
+  "homepage": "https://vacation-time-optimizer.vercel.app",
+  "keywords": [
+    "vacation",
+    "planning",
+    "holidays",
+    "calendar",
+    "time-off",
+    "react",
+    "typescript"
+  ],
   "type": "module",
   "scripts": {
     "dev": "vite",
