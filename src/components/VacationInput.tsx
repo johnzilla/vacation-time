@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
-import { Calendar, Plus, Minus } from 'lucide-react';
+import { Calendar, Plus, Minus, Globe } from 'lucide-react';
+import { CountrySelector } from './CountrySelector';
+import { CountryCode } from '../data/countryHolidays';
 
 interface VacationInputProps {
   availableVacationDays: number;
   usedVacationDays: number;
+  selectedCountry: CountryCode;
   onVacationDaysChange: (available: number, used: number) => void;
+  onCountryChange: (country: CountryCode) => void;
 }
 
 export const VacationInput: React.FC<VacationInputProps> = ({
   availableVacationDays,
   usedVacationDays,
-  onVacationDaysChange
+  selectedCountry,
+  onVacationDaysChange,
+  onCountryChange
 }) => {
   const remainingDays = availableVacationDays - usedVacationDays;
   
@@ -34,6 +40,18 @@ export const VacationInput: React.FC<VacationInputProps> = ({
       </div>
       
       <div className="space-y-6">
+        {/* Country Selection */}
+        <div className="bg-gray-50 rounded-xl p-4">
+          <label className="block text-sm font-semibold text-gray-700 mb-3">
+            <Globe className="inline w-4 h-4 mr-2" />
+            Country/Region Holidays
+          </label>
+          <CountrySelector
+            selectedCountry={selectedCountry}
+            onCountryChange={onCountryChange}
+          />
+        </div>
+        
         {/* Total Available Days */}
         <div className="bg-gray-50 rounded-xl p-4">
           <label className="block text-sm font-semibold text-gray-700 mb-3">

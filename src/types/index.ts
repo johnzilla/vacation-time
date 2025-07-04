@@ -19,3 +19,22 @@ export interface UserSettings {
   usedVacationDays: number;
   companyHolidays: Holiday[];
 }
+
+export interface SavedVacationPlan {
+  id: string;
+  name: string;
+  plan: VacationPlan;
+  isBooked: boolean;
+  createdAt: string;
+  notes?: string;
+}
+
+export interface VacationGoal {
+  id: string;
+  title: string;
+  description: string;
+  targetDays: number;
+  priority: 'low' | 'medium' | 'high';
+  preferredMonths: number[];
+  isFlexible: boolean;
+}

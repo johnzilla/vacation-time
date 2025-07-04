@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar } from './components/Calendar';
+import { CalendarContainer } from './components/CalendarContainer';
 import { VacationInput } from './components/VacationInput';
 import { VacationRecommendations } from './components/VacationRecommendations';
-import { US_GOVERNMENT_HOLIDAYS_2024, DEFAULT_COMPANY_HOLIDAYS } from './data/holidays';
+import { MobileDrawer } from './components/MobileDrawer';
+import { getCountryHolidays, CountryCode } from './data/countryHolidays';
 import { findOptimalVacationPeriods } from './utils/vacationOptimizer';
 import { parseDate } from './utils/dateUtils';
 import { Holiday, VacationPlan } from './types';
@@ -11,11 +12,12 @@ import { Plane, Target, Calendar as CalendarIcon } from 'lucide-react';
 function App() {
   const [availableVacationDays, setAvailableVacationDays] = useState(20);
   const [usedVacationDays, setUsedVacationDays] = useState(5);
+  const [selectedCountry, setSelectedCountry] = useState<CountryCode>('US');
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
   const [recommendations, setRecommendations] = useState<VacationPlan[]>([]);
   const [highlightedPeriod, setHighlightedPeriod] = useState<{ start: Date; end: Date } | undefined>();
   
-  const allHolidays: Holiday[] = [...US_GOVERNMENT_HOLIDAYS_2024, ...DEFAULT_COMPANY_HOLIDAYS];
+  const allHolidays: Holiday[] = getCountryHolidays(selectedCountry);
   
   useEffect(() => {
     const remainingDays = availableVacationDays - usedVacationDays;
@@ -25,7 +27,7 @@ function App() {
     } else {
       setRecommendations([]);
     }
-  }, [availableVacationDays, usedVacationDays]);
+  }, [availableVacationDays, usedVacationDays, selectedCountry]);
   
   const handleVacationDaysChange = (available: number, used: number) => {
     setAvailableVacationDays(available);
@@ -105,16 +107,41 @@ function App() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Input and Recommendations */}
           <div className="lg:col-span-1 space-y-8">
-            <VacationInput
-              availableVacationDays={availableVacationDays}
-              usedVacationDays={usedVacationDays}
-              onVacationDaysChange={handleVacationDaysChange}
-            />
+            {/* Desktop layout */}
+            <div className="hidden lg:block space-y-8">
+              <VacationInput
+                availableVacationDays={availableVacationDays}
+                usedVacationDays={usedVacationDays}
+                selectedCountry={selectedCountry}
+                onVacationDaysChange={handleVacationDaysChange}
+                onCountryChange={setSelectedCountry}
+              />
+              
+              <VacationRecommendations
+                recommendations={recommendations}
+                onPlanSelect={handlePlanSelect}
+              />
+            </div>
             
-            <VacationRecommendations
-              recommendations={recommendations}
-              onPlanSelect={handlePlanSelect}
-            />
+            {/* Mobile layout with drawers */}
+            <div className="lg:hidden space-y-4">
+              <MobileDrawer title="Vacation Settings" defaultOpen={true}>
+                <VacationInput
+                  availableVacationDays={availableVacationDays}
+                  usedVacationDays={usedVacationDays}
+                  selectedCountry={selectedCountry}
+                  onVacationDaysChange={handleVacationDaysChange}
+                  onCountryChange={setSelectedCountry}
+                />
+              </MobileDrawer>
+              
+              <MobileDrawer title="Smart Recommendations">
+                <VacationRecommendations
+                  recommendations={recommendations}
+                  onPlanSelect={handlePlanSelect}
+                />
+              </MobileDrawer>
+            </div>
           </div>
           
           {/* Right Column - Calendar */}
@@ -141,7 +168,7 @@ function App() {
                 </div>
               )}
               
-              <Calendar
+              <CalendarContainer
                 selectedDates={selectedDates}
                 holidays={allHolidays}
                 onDateSelect={handleDateSelect}

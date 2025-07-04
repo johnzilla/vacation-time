@@ -3,52 +3,27 @@ import { Holiday } from '../types';
 import { parseDate, isWeekend, isSameDay } from '../utils/dateUtils';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-interface CalendarProps {
+interface YearCalendarProps {
   selectedDates: Date[];
   holidays: Holiday[];
   onDateSelect: (date: Date) => void;
   highlightedPeriod?: { start: Date; end: Date };
 }
 
-export const Calendar: React.FC<CalendarProps> = ({
+export const YearCalendar: React.FC<YearCalendarProps> = ({
   selectedDates,
   holidays,
   onDateSelect,
   highlightedPeriod
 }) => {
-  const today = new Date();
-  const [currentMonth, setCurrentMonth] = useState(today.getMonth());
-  const [currentYear, setCurrentYear] = useState(today.getFullYear());
-  
-  const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
-  const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
-  const firstDayOfWeek = firstDayOfMonth.getDay();
-  const daysInMonth = lastDayOfMonth.getDate();
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   
   const monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
   
-  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  
-  const navigateMonth = (direction: 'prev' | 'next') => {
-    if (direction === 'prev') {
-      if (currentMonth === 0) {
-        setCurrentMonth(11);
-        setCurrentYear(currentYear - 1);
-      } else {
-        setCurrentMonth(currentMonth - 1);
-      }
-    } else {
-      if (currentMonth === 11) {
-        setCurrentMonth(0);
-        setCurrentYear(currentYear + 1);
-      } else {
-        setCurrentMonth(currentMonth + 1);
-      }
-    }
-  };
+  const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
   
   const isHoliday = (date: Date): Holiday | undefined => {
     return holidays.find(holiday => isSameDay(parseDate(holiday.date), date));
@@ -63,17 +38,23 @@ export const Calendar: React.FC<CalendarProps> = ({
     return date >= highlightedPeriod.start && date <= highlightedPeriod.end;
   };
   
-  const renderCalendarDays = () => {
+  const renderMonth = (monthIndex: number) => {
+    const firstDay = new Date(currentYear, monthIndex, 1);
+    const lastDay = new Date(currentYear, monthIndex + 1, 0);
+    const firstDayOfWeek = firstDay.getDay();
+    const daysInMonth = lastDay.getDate();
+    const today = new Date();
+    
     const days = [];
     
     // Empty cells for days before the first day of the month
     for (let i = 0; i < firstDayOfWeek; i++) {
-      days.push(<div key={`empty-${i}`} className="h-12" />);
+      days.push(<div key={`empty-${i}`} className="h-8" />);
     }
     
     // Days of the month
     for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(currentYear, currentMonth, day);
+      const date = new Date(currentYear, monthIndex, day);
       const weekend = isWeekend(date);
       const holiday = isHoliday(date);
       const selected = isSelected(date);
@@ -86,10 +67,10 @@ export const Calendar: React.FC<CalendarProps> = ({
           onClick={() => onDateSelect(date)}
           disabled={isPast}
           className={`
-            h-12 w-full rounded-lg text-sm font-medium transition-all duration-200 relative
+            h-8 w-8 rounded text-xs font-medium transition-all duration-200 relative
             ${isPast 
               ? 'text-gray-300 cursor-not-allowed' 
-              : 'hover:bg-blue-50 hover:scale-105'
+              : 'hover:bg-blue-50 hover:scale-110'
             }
             ${weekend ? 'text-blue-600' : 'text-gray-700'}
             ${holiday ? 'bg-green-100 text-green-800 border border-green-300' : ''}
@@ -98,43 +79,60 @@ export const Calendar: React.FC<CalendarProps> = ({
           `}
           title={holiday ? holiday.name : ''}
         >
-          <span className="relative z-10">{day}</span>
+          {day}
           {holiday && (
-            <div className="absolute inset-x-0 bottom-0 h-1 bg-green-500 rounded-full" />
-          )}
-          {weekend && !holiday && (
-            <div className="absolute inset-x-0 bottom-0 h-1 bg-blue-300 rounded-full" />
+            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-green-500 rounded-full" />
           )}
         </button>
       );
     }
     
-    return days;
+    return (
+      <div key={monthIndex} className="bg-white rounded-lg p-4 shadow-sm">
+        <h3 className="text-lg font-semibold text-gray-800 mb-3 text-center">
+          {monthNames[monthIndex]}
+        </h3>
+        
+        <div className="grid grid-cols-7 gap-1 mb-2">
+          {dayNames.map(day => (
+            <div key={day} className="text-center text-xs font-semibold text-gray-500 h-6 flex items-center justify-center">
+              {day}
+            </div>
+          ))}
+        </div>
+        
+        <div className="grid grid-cols-7 gap-1">
+          {days}
+        </div>
+      </div>
+    );
   };
   
   return (
     <div className="bg-white rounded-2xl shadow-xl p-6">
       <div className="flex items-center justify-between mb-6">
         <button
-          onClick={() => navigateMonth('prev')}
+          onClick={() => setCurrentYear(currentYear - 1)}
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
         
-        <h2 className="text-2xl font-bold text-gray-800">
-          {monthNames[currentMonth]} {currentYear}
-        </h2>
+        <h2 className="text-2xl font-bold text-gray-800">{currentYear}</h2>
         
         <button
-          onClick={() => navigateMonth('next')}
+          onClick={() => setCurrentYear(currentYear + 1)}
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
       </div>
       
-      <div className="flex items-center gap-4 text-sm mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {Array.from({ length: 12 }, (_, i) => renderMonth(i))}
+      </div>
+      
+      <div className="flex items-center justify-center gap-6 text-sm mt-6">
         <div className="flex items-center gap-1">
           <div className="w-3 h-1 bg-blue-300 rounded-full" />
           <span className="text-gray-600">Weekends</span>
@@ -147,18 +145,6 @@ export const Calendar: React.FC<CalendarProps> = ({
           <div className="w-3 h-3 bg-blue-500 rounded-full" />
           <span className="text-gray-600">Selected</span>
         </div>
-      </div>
-      
-      <div className="grid grid-cols-7 gap-2 mb-2">
-        {dayNames.map(day => (
-          <div key={day} className="text-center text-sm font-semibold text-gray-500 py-2">
-            {day}
-          </div>
-        ))}
-      </div>
-      
-      <div className="grid grid-cols-7 gap-2">
-        {renderCalendarDays()}
       </div>
     </div>
   );
