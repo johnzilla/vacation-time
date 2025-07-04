@@ -1,14 +1,16 @@
 import React from 'react';
 import { VacationPlan } from '../types';
-import { TrendingUp, Calendar, Clock, Star } from 'lucide-react';
+import { TrendingUp, Calendar, Clock, Star, Target } from 'lucide-react';
 
 interface VacationRecommendationsProps {
   recommendations: VacationPlan[];
+  targetConsecutiveDays?: number;
   onPlanSelect: (plan: VacationPlan) => void;
 }
 
 export const VacationRecommendations: React.FC<VacationRecommendationsProps> = ({
   recommendations,
+  targetConsecutiveDays = 7,
   onPlanSelect
 }) => {
   const formatDateRange = (startDate: string, endDate: string): string => {
@@ -79,6 +81,12 @@ export const VacationRecommendations: React.FC<VacationRecommendationsProps> = (
                   <div className="flex items-center gap-1 text-yellow-500">
                     <Star className="w-4 h-4 fill-current" />
                     <span className="text-xs font-semibold">TOP PICK</span>
+                  </div>
+                )}
+                {plan.totalDays >= targetConsecutiveDays && (
+                  <div className="flex items-center gap-1 text-green-600">
+                    <Target className="w-4 h-4" />
+                    <span className="text-xs font-semibold">TARGET MET</span>
                   </div>
                 )}
                 <span className="text-lg font-bold text-gray-800">

@@ -29,6 +29,7 @@ function App() {
   const [availableVacationDays, setAvailableVacationDays] = useState(20);
   const [usedVacationDays, setUsedVacationDays] = useState(5);
   const [selectedCountry, setSelectedCountry] = useState<CountryCode>('US');
+  const [targetConsecutiveDays, setTargetConsecutiveDays] = useState(7); // Default to 1 week
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
   const [recommendations, setRecommendations] = useState<VacationPlan[]>([]);
   const [highlightedPeriod, setHighlightedPeriod] = useState<{ start: Date; end: Date } | undefined>();
@@ -38,12 +39,17 @@ function App() {
   useEffect(() => {
     const remainingDays = availableVacationDays - usedVacationDays;
     if (remainingDays > 0) {
-      const newRecommendations = findOptimalVacationPeriods(remainingDays, allHolidays);
+      const newRecommendations = findOptimalVacationPeriods(
+        remainingDays, 
+        allHolidays, 
+        new Date().getFullYear(),
+        targetConsecutiveDays
+      );
       setRecommendations(newRecommendations);
     } else {
       setRecommendations([]);
     }
-  }, [availableVacationDays, usedVacationDays, selectedCountry]);
+  }, [availableVacationDays, usedVacationDays, selectedCountry, targetConsecutiveDays]);
   
   const handleVacationDaysChange = (available: number, used: number) => {
     setAvailableVacationDays(available);
@@ -129,12 +135,15 @@ function App() {
                 availableVacationDays={availableVacationDays}
                 usedVacationDays={usedVacationDays}
                 selectedCountry={selectedCountry}
+                targetConsecutiveDays={targetConsecutiveDays}
                 onVacationDaysChange={handleVacationDaysChange}
                 onCountryChange={setSelectedCountry}
+                onTargetDaysChange={setTargetConsecutiveDays}
               />
               
               <VacationRecommendations
                 recommendations={recommendations}
+                targetConsecutiveDays={targetConsecutiveDays}
                 onPlanSelect={handlePlanSelect}
               />
             </div>
@@ -146,14 +155,17 @@ function App() {
                   availableVacationDays={availableVacationDays}
                   usedVacationDays={usedVacationDays}
                   selectedCountry={selectedCountry}
+                  targetConsecutiveDays={targetConsecutiveDays}
                   onVacationDaysChange={handleVacationDaysChange}
                   onCountryChange={setSelectedCountry}
+                  onTargetDaysChange={setTargetConsecutiveDays}
                 />
               </MobileDrawer>
               
               <MobileDrawer title="Smart Recommendations">
                 <VacationRecommendations
                   recommendations={recommendations}
+                  targetConsecutiveDays={targetConsecutiveDays}
                   onPlanSelect={handlePlanSelect}
                 />
               </MobileDrawer>

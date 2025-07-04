@@ -7,16 +7,20 @@ interface VacationInputProps {
   availableVacationDays: number;
   usedVacationDays: number;
   selectedCountry: CountryCode;
+  targetConsecutiveDays: number;
   onVacationDaysChange: (available: number, used: number) => void;
   onCountryChange: (country: CountryCode) => void;
+  onTargetDaysChange: (days: number) => void;
 }
 
 export const VacationInput: React.FC<VacationInputProps> = ({
   availableVacationDays,
   usedVacationDays,
   selectedCountry,
+  targetConsecutiveDays,
   onVacationDaysChange,
-  onCountryChange
+  onCountryChange,
+  onTargetDaysChange
 }) => {
   const remainingDays = availableVacationDays - usedVacationDays;
   
@@ -28,6 +32,11 @@ export const VacationInput: React.FC<VacationInputProps> = ({
   const adjustUsedDays = (amount: number) => {
     const newUsed = Math.max(0, Math.min(availableVacationDays, usedVacationDays + amount));
     onVacationDaysChange(availableVacationDays, newUsed);
+  };
+  
+  const adjustTargetDays = (amount: number) => {
+    const newTarget = Math.max(1, Math.min(remainingDays, targetConsecutiveDays + amount));
+    onTargetDaysChange(newTarget);
   };
   
   return (
@@ -103,6 +112,56 @@ export const VacationInput: React.FC<VacationInputProps> = ({
               </button>
             </div>
             <span className="text-sm text-gray-500">days used</span>
+          </div>
+        </div>
+        
+        {/* Target Consecutive Days */}
+        <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+          <label className="block text-sm font-semibold text-blue-800 mb-3">
+            Target Vacation Length (Days in a Row)
+          </label>
+          
+          {/* Quick presets */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            {[3, 5, 7, 10, 14].map((days) => (
+              <button
+                key={days}
+                onClick={() => onTargetDaysChange(days)}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                  targetConsecutiveDays === days
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-blue-600 hover:bg-blue-100'
+                }`}
+              >
+                {days} days
+              </button>
+            ))}
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => adjustTargetDays(-1)}
+                className="p-2 rounded-lg bg-white shadow-md hover:shadow-lg transition-shadow text-blue-600 hover:text-blue-800"
+              >
+                <Minus className="w-4 h-4" />
+              </button>
+              <span className="text-2xl font-bold text-blue-800 min-w-[3rem] text-center">
+                {targetConsecutiveDays}
+              </span>
+              <button
+                onClick={() => adjustTargetDays(1)}
+                className="p-2 rounded-lg bg-white shadow-md hover:shadow-lg transition-shadow text-blue-600 hover:text-blue-800"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
+            <span className="text-sm text-blue-600">days off</span>
+          </div>
+          <div className="mt-2">
+            <p className="text-xs text-blue-700">
+              Find vacations that give you at least {targetConsecutiveDays} consecutive days off
+            </p>
           </div>
         </div>
         
