@@ -33,6 +33,7 @@ function App() {
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
   const [recommendations, setRecommendations] = useState<VacationPlan[]>([]);
   const [highlightedPeriod, setHighlightedPeriod] = useState<{ start: Date; end: Date } | undefined>();
+  const [navigateToDate, setNavigateToDate] = useState<Date | undefined>();
   
   const allHolidays: Holiday[] = getCountryHolidays(selectedCountry);
   
@@ -77,6 +78,7 @@ function App() {
     const endDate = parseDate(plan.endDate);
     
     setHighlightedPeriod({ start: startDate, end: endDate });
+    setNavigateToDate(startDate); // Navigate calendar to the start of the vacation
     
     // Generate all dates in the range and select them
     const dates: Date[] = [];
@@ -88,10 +90,19 @@ function App() {
     }
     
     setSelectedDates(dates);
+    
+    // Scroll to calendar section on mobile
+    if (window.innerWidth < 1024) {
+      const calendarElement = document.getElementById('calendar-section');
+      if (calendarElement) {
+        calendarElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
   };
   
   const clearHighlight = () => {
     setHighlightedPeriod(undefined);
+    setNavigateToDate(undefined);
   };
   
   return (
@@ -174,7 +185,7 @@ function App() {
           
           {/* Right Column - Calendar */}
           <div className="lg:col-span-2">
-            <div className="space-y-6">
+            <div className="space-y-6" id="calendar-section">
               {highlightedPeriod && (
                 <div className="bg-white rounded-2xl shadow-xl p-4 border-l-4 border-blue-500">
                   <div className="flex items-center justify-between">
@@ -201,6 +212,7 @@ function App() {
                 holidays={allHolidays}
                 onDateSelect={handleDateSelect}
                 highlightedPeriod={highlightedPeriod}
+                navigateToDate={navigateToDate}
               />
               
               {selectedDates.length > 0 && (

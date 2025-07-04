@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Holiday } from '../types';
 import { parseDate, isWeekend, isSameDay } from '../utils/dateUtils';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -8,15 +8,24 @@ interface YearCalendarProps {
   holidays: Holiday[];
   onDateSelect: (date: Date) => void;
   highlightedPeriod?: { start: Date; end: Date };
+  navigateToDate?: Date;
 }
 
 export const YearCalendar: React.FC<YearCalendarProps> = ({
   selectedDates,
   holidays,
   onDateSelect,
-  highlightedPeriod
+  highlightedPeriod,
+  navigateToDate
 }) => {
-  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [currentYear, setCurrentYear] = useState(navigateToDate?.getFullYear() ?? new Date().getFullYear());
+  
+  // Navigate to specific date when highlightedPeriod changes
+  useEffect(() => {
+    if (highlightedPeriod) {
+      setCurrentYear(highlightedPeriod.start.getFullYear());
+    }
+  }, [highlightedPeriod]);
   
   const monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',

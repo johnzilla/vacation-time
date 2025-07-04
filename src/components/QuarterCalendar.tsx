@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Holiday } from '../types';
 import { parseDate, isWeekend, isSameDay } from '../utils/dateUtils';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -8,16 +8,29 @@ interface QuarterCalendarProps {
   holidays: Holiday[];
   onDateSelect: (date: Date) => void;
   highlightedPeriod?: { start: Date; end: Date };
+  navigateToDate?: Date;
 }
 
 export const QuarterCalendar: React.FC<QuarterCalendarProps> = ({
   selectedDates,
   holidays,
   onDateSelect,
-  highlightedPeriod
+  highlightedPeriod,
+  navigateToDate
 }) => {
-  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
-  const [currentQuarter, setCurrentQuarter] = useState(Math.floor(new Date().getMonth() / 3));
+  const [currentYear, setCurrentYear] = useState(navigateToDate?.getFullYear() ?? new Date().getFullYear());
+  const [currentQuarter, setCurrentQuarter] = useState(
+    navigateToDate ? Math.floor(navigateToDate.getMonth() / 3) : Math.floor(new Date().getMonth() / 3)
+  );
+  
+  // Navigate to specific date when highlightedPeriod changes
+  useEffect(() => {
+    if (highlightedPeriod) {
+      const startQuarter = Math.floor(highlightedPeriod.start.getMonth() / 3);
+      setCurrentQuarter(startQuarter);
+      setCurrentYear(highlightedPeriod.start.getFullYear());
+    }
+  }, [highlightedPeriod]);
   
   const monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
