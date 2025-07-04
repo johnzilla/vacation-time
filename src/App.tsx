@@ -19,6 +19,7 @@ import { CalendarContainer } from './components/CalendarContainer';
 import { VacationInput } from './components/VacationInput';
 import { VacationRecommendations } from './components/VacationRecommendations';
 import { MobileDrawer } from './components/MobileDrawer';
+import { CalendarExport } from './components/CalendarExport';
 import { getCountryHolidays, CountryCode } from './data/countryHolidays';
 import { findOptimalVacationPeriods } from './utils/vacationOptimizer';
 import { parseDate } from './utils/dateUtils';
@@ -34,6 +35,7 @@ function App() {
   const [recommendations, setRecommendations] = useState<VacationPlan[]>([]);
   const [highlightedPeriod, setHighlightedPeriod] = useState<{ start: Date; end: Date } | undefined>();
   const [navigateToDate, setNavigateToDate] = useState<Date | undefined>();
+  const [selectedPlan, setSelectedPlan] = useState<VacationPlan | undefined>();
   
   const allHolidays: Holiday[] = getCountryHolidays(selectedCountry);
   
@@ -79,6 +81,7 @@ function App() {
     
     setHighlightedPeriod({ start: startDate, end: endDate });
     setNavigateToDate(startDate); // Navigate calendar to the start of the vacation
+    setSelectedPlan(plan); // Store the selected plan for export functionality
     
     // Generate all dates in the range and select them
     const dates: Date[] = [];
@@ -103,6 +106,7 @@ function App() {
   const clearHighlight = () => {
     setHighlightedPeriod(undefined);
     setNavigateToDate(undefined);
+    setSelectedPlan(undefined);
   };
   
   return (
@@ -186,23 +190,48 @@ function App() {
           {/* Right Column - Calendar */}
           <div className="lg:col-span-2">
             <div className="space-y-6" id="calendar-section">
-              {highlightedPeriod && (
-                <div className="bg-white rounded-2xl shadow-xl p-4 border-l-4 border-blue-500">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-semibold text-gray-800">
-                        Viewing Recommended Period
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        {highlightedPeriod.start.toLocaleDateString()} - {highlightedPeriod.end.toLocaleDateString()}
-                      </p>
+              {highlightedPeriod && selectedPlan && (
+                <div className="bg-white rounded-2xl shadow-xl p-6 border-l-4 border-blue-500">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-semibold text-gray-800">
+                          Viewing Recommended Period
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          {highlightedPeriod.start.toLocaleDateString()} - {highlightedPeriod.end.toLocaleDateString()}
+                        </p>
+                      </div>
+                      <button
+                        onClick={clearHighlight}
+                        className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                      >
+                        Clear
+                      </button>
                     </div>
-                    <button
-                      onClick={clearHighlight}
-                      className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-                    >
-                      Clear
-                    </button>
+                    
+                    {/* Vacation Plan Summary */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-blue-600">{selectedPlan.totalDays}</div>
+                        <div className="text-xs text-gray-500">Total Days Off</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-red-600">{selectedPlan.vacationDaysUsed}</div>
+                        <div className="text-xs text-gray-500">Vacation Days</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-green-600">{selectedPlan.weekendDays + selectedPlan.holidayDays}</div>
+                        <div className="text-xs text-gray-500">Free Days</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-purple-600">{selectedPlan.efficiency.toFixed(1)}x</div>
+                        <div className="text-xs text-gray-500">Efficiency</div>
+                      </div>
+                    </div>
+                    
+                    {/* Export to Calendar */}
+                    <CalendarExport plan={selectedPlan} />
                   </div>
                 </div>
               )}

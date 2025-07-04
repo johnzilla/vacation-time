@@ -119,8 +119,8 @@ export const VacationRecommendations: React.FC<VacationRecommendationsProps> = (
             
             <div className="flex items-center justify-between text-sm text-gray-600">
               <div className="flex items-center gap-4">
-                <span>🎯 {plan.weekendDays} weekends</span>
-                <span>🎉 {plan.holidayDays} holidays</span>
+                <span>🎯 {plan.weekendDays} weekend day{plan.weekendDays !== 1 ? 's' : ''}</span>
+                <span>🎉 {plan.holidayDays} holiday{plan.holidayDays !== 1 ? 's' : ''}</span>
               </div>
               <div className="flex items-center gap-1 text-blue-600 group-hover:text-blue-700">
                 <Clock className="w-4 h-4" />

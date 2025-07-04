@@ -25,6 +25,12 @@ A smart vacation planning app that helps you maximize your time off by finding o
 - **Collapsible Sections**: Mobile drawers for better space usage
 - **Touch-Friendly**: Large touch targets and swipe gestures
 
+### 📤 Calendar Export
+- **iCal File Download**: Download .ics files compatible with most calendar apps
+- **Google Calendar Integration**: Direct link to add events to Google Calendar  
+- **Outlook Integration**: Direct link to add events to Outlook.com
+- **Universal Compatibility**: Works with Apple Calendar, Outlook desktop, Thunderbird, and more
+
 ## 🚀 Getting Started
 
 ```bash
