@@ -206,7 +206,7 @@ function App() {
                     </div>
                     
                     {/* Vacation Plan Summary */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4 p-4 bg-gray-50 rounded-lg">
                       <div className="text-center">
                         <div className="text-lg font-bold text-blue-600">{selectedPlan.totalDays}</div>
                         <div className="text-xs text-gray-500">Total Days Off</div>
@@ -218,6 +218,10 @@ function App() {
                       <div className="text-center">
                         <div className="text-lg font-bold text-green-600">{selectedPlan.weekendDays + selectedPlan.holidayDays}</div>
                         <div className="text-xs text-gray-500">Free Days</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-orange-600">{availableVacationDays - usedVacationDays - selectedPlan.vacationDaysUsed}</div>
+                        <div className="text-xs text-gray-500">Days Remaining</div>
                       </div>
                       <div className="text-center">
                         <div className="text-lg font-bold text-purple-600">{selectedPlan.efficiency.toFixed(1)}x</div>
