@@ -94,13 +94,8 @@ function App() {
     
     setSelectedDates(dates);
     
-    // Scroll to calendar section on mobile
-    if (window.innerWidth < 1024) {
-      const calendarElement = document.getElementById('calendar-section');
-      if (calendarElement) {
-        calendarElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }
+    // Scroll to top to show the vacation details
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   
   const clearHighlight = () => {
