@@ -283,6 +283,23 @@
     background: #8b5cf6;
 }
 
+/* Footer */
+.site-footer {
+    margin-top: 3rem;
+    padding: 1.5rem 0;
+    text-align: center;
+    border-top: 1px solid var(--pico-muted-border-color);
+}
+
+.site-footer a {
+    color: inherit;
+}
+
+.footer-separator {
+    margin: 0 0.5rem;
+    opacity: 0.5;
+}
+
 /* Responsive table */
 @media (max-width: 768px) {
     .results-table {
