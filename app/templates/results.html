@@ -1,0 +1,296 @@
+<section class="results-section">
+    <header>
+        <h2>Vacation Options</h2>
+        {% if options %}
+        <div class="results-actions">
+            <span>Found {{ options|length }} options.</span>
+            <a href="/api/ics/all?data={{ encoded_options }}" role="button" class="secondary outline small">
+                Download All as Calendar
+            </a>
+        </div>
+        {% endif %}
+    </header>
+
+    {% if not options %}
+    <article>
+        <p>No vacation options found for the selected criteria. Try adjusting your date range or PTO days.</p>
+    </article>
+    {% else %}
+
+    {% set all_types = [] %}
+    {% for option in options %}
+        {% for holiday in option.holidays_included %}
+            {% for t in holiday.types %}
+                {% if t not in all_types %}
+                    {% set _ = all_types.append(t) %}
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    {% endfor %}
+
+    {% if all_types %}
+    <fieldset class="filter-controls">
+        <legend>Filter by holiday type</legend>
+        <div class="filter-checkboxes">
+            {% for htype in all_types|sort %}
+            <label>
+                <input type="checkbox" class="holiday-filter" value="{{ htype }}" checked>
+                {{ htype }}
+            </label>
+            {% endfor %}
+        </div>
+        <small class="filter-hint">Uncheck to hide options that include that holiday type</small>
+    </fieldset>
+    {% endif %}
+
+    <p class="visible-count">Showing <span id="visible-count">{{ options|length }}</span> of {{ options|length }} options</p>
+
+    <figure>
+        <table class="results-table" role="grid">
+            <thead>
+                <tr>
+                    <th class="sortable" data-sort="pto" data-type="number">PTO</th>
+                    <th class="sortable sorted-desc" data-sort="days" data-type="number">Days Off</th>
+                    <th class="sortable" data-sort="value" data-type="number">Eff.</th>
+                    <th class="sortable" data-sort="start" data-type="date">Start</th>
+                    <th class="sortable" data-sort="end" data-type="date">End</th>
+                    <th>PTO Dates</th>
+                    <th>Holidays</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for option in options %}
+                <tr class="option-row"
+                    data-holiday-types="{{ option.holidays_included|map(attribute='types')|sum(start=[])|unique|join(',') }}"
+                    data-pto="{{ option.pto_days_used }}"
+                    data-days="{{ option.total_days_off }}"
+                    data-value="{{ option.efficiency_ratio }}"
+                    data-start="{{ option.start_date.isoformat() }}"
+                    data-end="{{ option.end_date.isoformat() }}"
+                    data-pto-dates="{% for d in option.pto_dates %}{{ d.isoformat() }}{% if not loop.last %},{% endif %}{% endfor %}"
+                    data-holiday-dates="{% for h in option.holidays_included %}{{ h.date.isoformat() }}{% if not loop.last %},{% endif %}{% endfor %}">
+                    <td>{{ option.pto_days_used }}</td>
+                    <td><strong>{{ option.total_days_off }}</strong></td>
+                    <td>{{ option.efficiency_ratio }}x</td>
+                    <td>{{ option.start_date.strftime('%b %d') }}</td>
+                    <td>{{ option.end_date.strftime('%b %d') }}</td>
+                    <td class="pto-dates-cell">
+                        {% for pto_date in option.pto_dates %}
+                        <span class="pto-date">{{ pto_date.strftime('%a %b %d') }}</span>
+                        {% endfor %}
+                    </td>
+                    <td class="holidays-cell">
+                        {% if option.holidays_included %}
+                            {% for holiday in option.holidays_included %}
+                            <span class="holiday-name">{{ holiday.name }}</span>
+                            {% endfor %}
+                        {% else %}
+                            <span class="no-holidays">None</span>
+                        {% endif %}
+                    </td>
+                    <td class="actions-cell">
+                        <button class="view-calendar-btn outline small" type="button">View</button>
+                        <a href="/api/ics/single/{{ loop.index0 }}?data={{ encoded_options }}" class="download-link">ICS</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </figure>
+    {% endif %}
+</section>
+
+<!-- Calendar Modal -->
+<dialog id="calendar-modal">
+    <article>
+        <header>
+            <button aria-label="Close" rel="prev" class="close-modal"></button>
+            <h3 id="modal-title">Vacation Calendar</h3>
+        </header>
+        <div id="calendar-container"></div>
+        <div id="calendar-legend">
+            <span class="legend-item"><span class="legend-color legend-pto"></span> PTO Day</span>
+            <span class="legend-item"><span class="legend-color legend-holiday"></span> Holiday</span>
+            <span class="legend-item"><span class="legend-color legend-weekend"></span> Weekend</span>
+        </div>
+        <footer>
+            <button class="close-modal">Close</button>
+        </footer>
+    </article>
+</dialog>
+
+<script>
+(function() {
+    const filterCheckboxes = document.querySelectorAll('.holiday-filter');
+    const optionRows = document.querySelectorAll('.option-row');
+    const visibleCountEl = document.getElementById('visible-count');
+    const table = document.querySelector('.results-table');
+    const headers = document.querySelectorAll('.sortable');
+    const modal = document.getElementById('calendar-modal');
+    const calendarContainer = document.getElementById('calendar-container');
+    const modalTitle = document.getElementById('modal-title');
+
+    // Filtering
+    function applyFilters() {
+        const uncheckedTypes = Array.from(filterCheckboxes)
+            .filter(cb => !cb.checked)
+            .map(cb => cb.value);
+
+        let visibleCount = 0;
+
+        optionRows.forEach(row => {
+            const rowTypes = (row.dataset.holidayTypes || '').split(',').filter(Boolean);
+            const hasUncheckedType = rowTypes.some(t => uncheckedTypes.includes(t));
+
+            if (hasUncheckedType) {
+                row.style.display = 'none';
+            } else {
+                row.style.display = '';
+                visibleCount++;
+            }
+        });
+
+        if (visibleCountEl) {
+            visibleCountEl.textContent = visibleCount;
+        }
+    }
+
+    filterCheckboxes.forEach(cb => {
+        cb.addEventListener('change', applyFilters);
+    });
+
+    // Sorting
+    function sortTable(column, type, descending) {
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+
+        rows.sort((a, b) => {
+            let aVal = a.dataset[column];
+            let bVal = b.dataset[column];
+
+            if (type === 'number') {
+                aVal = parseFloat(aVal);
+                bVal = parseFloat(bVal);
+            } else if (type === 'date') {
+                aVal = new Date(aVal);
+                bVal = new Date(bVal);
+            }
+
+            if (aVal < bVal) return descending ? 1 : -1;
+            if (aVal > bVal) return descending ? -1 : 1;
+            return 0;
+        });
+
+        rows.forEach(row => tbody.appendChild(row));
+    }
+
+    headers.forEach(header => {
+        header.addEventListener('click', () => {
+            const column = header.dataset.sort;
+            const type = header.dataset.type;
+            const wasDesc = header.classList.contains('sorted-desc');
+
+            headers.forEach(h => h.classList.remove('sorted-asc', 'sorted-desc'));
+
+            let descending;
+            if (wasDesc) {
+                descending = false;
+                header.classList.add('sorted-asc');
+            } else {
+                descending = true;
+                header.classList.add('sorted-desc');
+            }
+
+            sortTable(column, type, descending);
+        });
+    });
+
+    // Calendar Modal
+    // Parse YYYY-MM-DD as local date (not UTC)
+    function parseLocalDate(dateStr) {
+        const [year, month, day] = dateStr.split('-').map(Number);
+        return new Date(year, month - 1, day);
+    }
+
+    // Format date as YYYY-MM-DD
+    function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function renderCalendar(startDate, endDate, ptoDates, holidayDates) {
+        const start = parseLocalDate(startDate);
+        const end = parseLocalDate(endDate);
+        const ptoSet = new Set(ptoDates);
+        const holidaySet = new Set(holidayDates);
+
+        // Extend to show full weeks
+        const viewStart = new Date(start);
+        viewStart.setDate(viewStart.getDate() - viewStart.getDay());
+        const viewEnd = new Date(end);
+        viewEnd.setDate(viewEnd.getDate() + (6 - viewEnd.getDay()));
+
+        let html = '<div class="calendar-grid">';
+        html += '<div class="calendar-header">Sun</div>';
+        html += '<div class="calendar-header">Mon</div>';
+        html += '<div class="calendar-header">Tue</div>';
+        html += '<div class="calendar-header">Wed</div>';
+        html += '<div class="calendar-header">Thu</div>';
+        html += '<div class="calendar-header">Fri</div>';
+        html += '<div class="calendar-header">Sat</div>';
+
+        const current = new Date(viewStart);
+        while (current <= viewEnd) {
+            const dateStr = formatDate(current);
+            const isInRange = current >= start && current <= end;
+            const isPto = ptoSet.has(dateStr);
+            const isHoliday = holidaySet.has(dateStr);
+            const isWeekend = current.getDay() === 0 || current.getDay() === 6;
+
+            let classes = ['calendar-day'];
+            if (!isInRange) classes.push('out-of-range');
+            if (isPto) classes.push('pto-day');
+            else if (isHoliday) classes.push('holiday-day');
+            else if (isWeekend && isInRange) classes.push('weekend-day');
+
+            const dayNum = current.getDate();
+            const monthLabel = dayNum === 1 ? current.toLocaleDateString('en-US', { month: 'short' }) + ' ' : '';
+
+            html += `<div class="${classes.join(' ')}">${monthLabel}${dayNum}</div>`;
+            current.setDate(current.getDate() + 1);
+        }
+
+        html += '</div>';
+        return html;
+    }
+
+    document.querySelectorAll('.view-calendar-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const row = btn.closest('tr');
+            const startDate = row.dataset.start;
+            const endDate = row.dataset.end;
+            const ptoDates = row.dataset.ptoDates ? row.dataset.ptoDates.split(',').filter(Boolean) : [];
+            const holidayDates = row.dataset.holidayDates ? row.dataset.holidayDates.split(',').filter(Boolean) : [];
+
+            const start = parseLocalDate(startDate);
+            const end = parseLocalDate(endDate);
+            modalTitle.textContent = `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+
+            calendarContainer.innerHTML = renderCalendar(startDate, endDate, ptoDates, holidayDates);
+
+            modal.showModal();
+        });
+    });
+
+    document.querySelectorAll('.close-modal').forEach(btn => {
+        btn.addEventListener('click', () => modal.close());
+    });
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.close();
+    });
+})();
+</script>

@@ -1,0 +1,296 @@
+.work-days-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.work-days-grid label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0;
+}
+
+.work-days-grid input[type="checkbox"] {
+    margin-bottom: 0;
+}
+
+.htmx-indicator {
+    display: none;
+}
+
+.htmx-request .htmx-indicator {
+    display: block;
+}
+
+.htmx-request.htmx-indicator {
+    display: block;
+}
+
+.results-section {
+    margin-top: 2rem;
+}
+
+.results-section header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.results-section header h2 {
+    margin-bottom: 0;
+}
+
+.results-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Filter controls */
+.filter-controls {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--pico-card-background-color);
+    border-radius: var(--pico-border-radius);
+}
+
+.filter-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.filter-checkboxes label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0;
+}
+
+.filter-checkboxes input[type="checkbox"] {
+    margin-bottom: 0;
+}
+
+.filter-hint {
+    display: block;
+    margin-top: 0.5rem;
+    color: var(--pico-muted-color);
+}
+
+.visible-count {
+    margin-bottom: 1rem;
+    color: var(--pico-muted-color);
+}
+
+/* Results table */
+.results-table {
+    width: 100%;
+    font-size: 0.9rem;
+}
+
+.results-table th {
+    white-space: nowrap;
+    user-select: none;
+}
+
+.results-table th.sortable {
+    cursor: pointer;
+}
+
+.results-table th.sortable:hover {
+    background: var(--pico-primary-focus);
+}
+
+.results-table th.sortable::after {
+    content: ' \2195';
+    opacity: 0.3;
+}
+
+.results-table th.sorted-asc::after {
+    content: ' \2191';
+    opacity: 1;
+}
+
+.results-table th.sorted-desc::after {
+    content: ' \2193';
+    opacity: 1;
+}
+
+.results-table td {
+    vertical-align: top;
+}
+
+.pto-dates-cell {
+    min-width: 120px;
+}
+
+.pto-date,
+.holiday-name {
+    display: block;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.holidays-cell {
+    min-width: 150px;
+}
+
+.holiday-item {
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.no-holidays {
+    color: var(--pico-muted-color);
+    font-style: italic;
+}
+
+.download-link {
+    font-size: 0.85rem;
+}
+
+/* Holiday type badges */
+.holiday-type-badge {
+    display: inline-block;
+    padding: 0.1rem 0.4rem;
+    margin-left: 0.25rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    text-transform: uppercase;
+    vertical-align: middle;
+}
+
+.holiday-type-public {
+    background: #22c55e;
+    color: white;
+}
+
+.holiday-type-observance {
+    background: #f59e0b;
+    color: white;
+}
+
+.holiday-type-optional {
+    background: #8b5cf6;
+    color: white;
+}
+
+.holiday-type-authorities {
+    background: #3b82f6;
+    color: white;
+}
+
+.holiday-type-school {
+    background: #ec4899;
+    color: white;
+}
+
+/* Actions cell */
+.actions-cell {
+    white-space: nowrap;
+}
+
+.view-calendar-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    margin-right: 0.5rem;
+}
+
+/* Calendar Modal */
+#calendar-modal article {
+    max-width: 500px;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    margin-bottom: 1rem;
+}
+
+.calendar-header {
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.75rem;
+    padding: 0.5rem 0;
+    color: var(--pico-muted-color);
+}
+
+.calendar-day {
+    text-align: center;
+    padding: 0.5rem 0.25rem;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    background: var(--pico-card-background-color);
+}
+
+.calendar-day.out-of-range {
+    opacity: 0.3;
+}
+
+.calendar-day.pto-day {
+    background: #3b82f6;
+    color: white;
+    font-weight: 600;
+}
+
+.calendar-day.holiday-day {
+    background: #22c55e;
+    color: white;
+    font-weight: 600;
+}
+
+.calendar-day.weekend-day {
+    background: #8b5cf6;
+    color: white;
+}
+
+#calendar-legend {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.legend-color {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 4px;
+}
+
+.legend-pto {
+    background: #3b82f6;
+}
+
+.legend-holiday {
+    background: #22c55e;
+}
+
+.legend-weekend {
+    background: #8b5cf6;
+}
+
+/* Responsive table */
+@media (max-width: 768px) {
+    .results-table {
+        font-size: 0.8rem;
+    }
+
+    .pto-dates-cell,
+    .holidays-cell {
+        min-width: auto;
+    }
+}
